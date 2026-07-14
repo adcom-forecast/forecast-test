@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Efecto Imán® — Demo de estructura</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F4F6F5;
+    --paper: #FFFFFF;
+    --ink: #10241E;
+    --muted: #62716C;
+    --line: #E1E6E3;
+    --primary: #1B6B5A;
+    --primary-dim: #E7F0EE;
+    --whatsapp: #25D366;
+    --whatsapp-dim: #E8FBF0;
+    --before: #B14B3C;
+    --before-dim: #F7EAE7;
+    --radius: 14px;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 48px 20px 80px;
+  }
+  .wrap{ max-width: 620px; margin: 0 auto; }
+
+  .meta{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  h1.title{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 26px;
+    text-align: center;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+  }
+  .sub{
+    text-align:center;
+    color: var(--muted);
+    font-size: 14px;
+    margin: 0 0 28px;
+    line-height: 1.5;
+  }
+
+  /* ---- Step rail ---- */
+  .rail{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap: 8px;
+    margin-bottom: 28px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .rail .step{ display:flex; align-items:center; gap:8px; }
+  .rail .dot{
+    width:20px;height:20px;border-radius:50%;
+    border:1.5px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px; color: var(--muted); background:var(--paper);
+    transition: all .25s ease;
+  }
+  .rail .step.active .dot{ background: var(--ink); border-color: var(--ink); color:#fff; }
+  .rail .step.done .dot{ background: var(--primary); border-color: var(--primary); color:#fff; }
+  .rail .bar{ width:28px; height:1px; background: var(--line); }
+  .rail .step.done + .bar{ background: var(--primary); }
+  .rail .label{ display:none; }
+
+  /* ---- Toggle Antes / Después (dentro del paso de gracias) ---- */
+  .toggle{
+    display:flex;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 4px;
+    max-width: 340px;
+    margin: 0 auto 28px;
+    position: relative;
+  }
+  .toggle button{
+    flex:1;
+    border:none;
+    background: transparent;
+    padding: 10px 14px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    border-radius: 999px;
+    position: relative;
+    z-index: 2;
+    transition: color .25s ease;
+  }
+  .toggle button.active{ color: #fff; }
+  .toggle .thumb{
+    position:absolute;
+    top:4px; left:4px;
+    width: calc(50% - 4px);
+    height: calc(100% - 8px);
+    background: var(--ink);
+    border-radius: 999px;
+    transition: transform .3s cubic-bezier(.4,0,.2,1), background .3s ease;
+    z-index:1;
+  }
+  .toggle.state-after .thumb{ background: var(--primary); transform: translateX(100%); }
+
+  .frame{
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 32px 28px 28px;
+    box-shadow: 0 1px 2px rgba(16,36,30,0.04), 0 12px 32px -16px rgba(16,36,30,0.12);
+  }
+
+  /* ---- FORM step ---- */
+  .form-head{ margin-bottom: 22px; }
+  .form-head h2{
+    font-family:'Fraunces', serif;
+    font-weight: 600;
+    font-size: 21px;
+    margin: 0 0 6px;
+  }
+  .form-head p{ color: var(--muted); font-size: 13.5px; margin:0; line-height:1.5; }
+
+  .field{ margin-bottom: 16px; }
+  .field label{
+    display:block;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+  .field .req{ color: var(--before); }
+  .field input, .field select, .field textarea{
+    width:100%;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 11px 13px;
+    font-family:'Inter', sans-serif;
+    font-size: 13.5px;
+    color: var(--ink);
+    background: #FCFDFC;
+    transition: border-color .15s ease, background .15s ease;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:none; border-color: var(--primary); background:#fff;
+  }
+  .field textarea{ resize: vertical; min-height: 64px; font-family:'Inter',sans-serif; }
+  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+  .qual-block{
+    margin: 22px 0 18px;
+    padding: 16px 16px 4px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    background: #FAFBFA;
+  }
+  .qual-eyebrow{
+    display:flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing:.05em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 14px;
+  }
+  .qual-eyebrow .pip{ width:6px;height:6px;border-radius:50%; background: var(--primary); }
+
+  .consent{
+    display:flex; gap:9px; align-items:flex-start;
+    font-size: 12px; color: var(--muted); line-height:1.5;
+    margin: 4px 0 22px;
+  }
+  .consent input{ margin-top:2px; }
+  .consent a{ color: var(--ink); }
+
+  .submit-btn{
+    width:100%;
+    border:none;
+    background: var(--ink);
+    color:#fff;
+    font-family:'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 14px;
+    border-radius: 12px;
+    cursor:pointer;
+    transition: background .15s ease, transform .1s ease;
+  }
+  .submit-btn:hover{ background:#1c3a30; }
+  .submit-btn:active{ transform: scale(.99); }
+
+  /* ---- ANTES state ---- */
+  .before-panel{ text-align:center; padding: 20px 6px 4px; }
+  .before-icon{
+    width: 44px; height:44px; border-radius: 50%;
+    background: var(--before-dim); color: var(--before);
+    display:flex; align-items:center; justify-content:center;
+    margin: 0 auto 18px; font-size: 20px;
+  }
+  .before-panel h2{ font-family:'Fraunces', serif; font-weight: 500; font-size: 19px; margin: 0 0 10px; }
+  .before-panel p{ color: var(--muted); font-size: 14px; line-height: 1.6; max-width: 380px; margin: 0 auto 22px; }
+  .before-stamp{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono', monospace; font-size: 11px; letter-spacing: .04em;
+    color: var(--before); background: var(--before-dim); padding: 8px 14px; border-radius: 999px;
+  }
+  .before-stamp .dot{ width:6px; height:6px; border-radius:50%; background: var(--before); }
+  .before-footnote{ margin-top: 22px; font-size: 12px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 16px; }
+
+  /* ---- DESPUÉS state ---- */
+  .after-head{ text-align:center; margin-bottom: 26px; }
+  .after-head .hi{ font-family:'Fraunces', serif; font-size: 20px; font-weight: 600; margin: 0 0 6px; }
+  .after-head .hi span{ color: var(--primary); }
+  .after-head p{ color: var(--muted); font-size: 14px; margin: 0; line-height:1.5; }
+  .after-head p b{ color: var(--ink); font-weight:600; }
+
+  .ladder{ display:flex; flex-direction:column; gap:12px; }
+  .opt{
+    display:flex; align-items:center; gap:14px;
+    border-radius: var(--radius); border: 1px solid var(--line); background: var(--paper);
+    cursor:pointer; text-align:left; font-family:'Inter', sans-serif;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+    width:100%;
+  }
+  .opt:hover{ transform: translateY(-1px); box-shadow: 0 8px 20px -12px rgba(16,36,30,.25); }
+  .opt:active{ transform: translateY(0); }
+  .opt .ic{ display:flex; align-items:center; justify-content:center; flex-shrink:0; border-radius: 10px; }
+  .opt .body{ flex:1; min-width:0; }
+  .opt .label{ font-weight: 700; margin:0 0 2px; }
+  .opt .desc{ color: var(--muted); margin:0; }
+  .opt .arrow{ flex-shrink:0; color: var(--muted); font-size: 16px; padding-right: 4px; }
+
+  .opt.rank-1{ padding: 20px; background: var(--whatsapp-dim); border-color: transparent; position: relative; }
+  .opt.rank-1 .ic{ width:48px; height:48px; background: var(--whatsapp); color:#fff; font-size:22px; }
+  .opt.rank-1 .label{ font-size: 16px; }
+  .opt.rank-1 .desc{ font-size: 13px; }
+  .opt.rank-1 .pulse{
+    position:absolute; top:14px; right:16px; display:flex; align-items:center; gap:6px;
+    font-family:'IBM Plex Mono', monospace; font-size: 10px; letter-spacing:.04em; color: #128C4A;
+  }
+  .opt.rank-1 .pulse i{ width:7px;height:7px;border-radius:50%; background:#22C55E; box-shadow: 0 0 0 0 rgba(34,197,94,.6); animation: pulse 1.8s infinite; }
+  @keyframes pulse{
+    0%{ box-shadow: 0 0 0 0 rgba(34,197,94,.55); }
+    70%{ box-shadow: 0 0 0 9px rgba(34,197,94,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+  }
+
+  .opt.rank-2{ padding: 16px 18px; }
+  .opt.rank-2 .ic{ width:40px; height:40px; background: var(--primary-dim); color: var(--primary); font-size:18px; }
+  .opt.rank-2 .label{ font-size: 14.5px; }
+  .opt.rank-2 .desc{ font-size: 12.5px; }
+
+  .opt.rank-3{ padding: 13px 16px; }
+  .opt.rank-3 .ic{ width:34px; height:34px; background:#F1F3F2; color: var(--ink); font-size:15px; }
+  .opt.rank-3 .label{ font-size: 13.5px; }
+  .opt.rank-3 .desc{ font-size: 12px; }
+
+  .opt.rank-4{ padding: 10px 4px 2px; border:none; justify-content:center; text-align:center; background:transparent; }
+  .opt.rank-4:hover{ transform:none; box-shadow:none; }
+  .opt.rank-4 .label{ font-size: 12.5px; font-weight:500; color: var(--muted); text-decoration: underline; text-underline-offset:3px; text-decoration-color: var(--line); }
+  .opt.rank-4 .ic, .opt.rank-4 .desc, .opt.rank-4 .arrow{ display:none; }
+
+  .sim{
+    margin-top: 16px; border-radius: var(--radius); border: 1px solid var(--line); background: #FAFBFA;
+    overflow: hidden; max-height: 0; opacity: 0;
+    transition: max-height .35s ease, opacity .3s ease, margin .35s ease;
+  }
+  .sim.open{ max-height: 280px; opacity: 1; }
+  .sim-inner{ padding: 18px 20px; }
+  .sim-eyebrow{ font-family:'IBM Plex Mono', monospace; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--primary); margin: 0 0 10px; }
+  .chat-bubble{ background:#fff; border:1px solid var(--line); border-radius: 12px 12px 12px 3px; padding: 10px 13px; font-size: 13px; line-height:1.5; max-width: 88%; box-shadow: 0 1px 2px rgba(0,0,0,.03); }
+
+  .cal-widget{ border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#fff; }
+  .cal-widget-head{ background: var(--ink); color:#fff; padding:9px 13px; font-size:11.5px; font-family:'IBM Plex Mono', monospace; display:flex; align-items:center; gap:7px; }
+  .cal-widget-head .cico{ width:14px;height:14px;border-radius:3px; background:#fff; opacity:.9; }
+  .cal-body{ padding:12px 13px; }
+  .cal-grid{ display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
+  .cal-slot{ border:1px solid var(--line); border-radius:8px; padding:8px 4px; text-align:center; font-size:12px; background:#fff; }
+  .cal-slot.sel{ border-color: var(--primary); background: var(--primary-dim); color: var(--primary); font-weight:600; }
+
+  .dial{ display:flex; align-items:center; gap:12px; }
+  .dial .ring{ width:38px;height:38px;border-radius:50%;background: var(--primary-dim); color:var(--primary); display:flex;align-items:center;justify-content:center; font-size:16px; animation: pulse 1.8s infinite; }
+
+  .mini-form{ display:flex; gap:8px; }
+  .mini-form input{ flex:1; border:1px solid var(--line); border-radius:8px; padding:9px 11px; font-size:13px; font-family:'Inter',sans-serif; }
+  .mini-form button{ border:none; background: var(--ink); color:#fff; border-radius:8px; padding:0 16px; font-weight:600; font-size:13px; cursor:pointer; }
+  .sim-note{ font-size:11.5px; color:var(--muted); margin-top:10px; }
+
+  .trust{
+    margin-top: 22px; display:flex; align-items:center; justify-content:center; gap:8px;
+    font-family:'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing:.04em; color: var(--muted);
+  }
+  .trust .seal{ width:16px;height:16px;border-radius:50%; border:1.5px solid var(--muted); display:flex;align-items:center;justify-content:center; font-size:9px; }
+
+  .back-link{
+    display:block; text-align:center; margin-top:16px;
+    font-size: 12px; color: var(--muted); text-decoration:underline; text-underline-offset:3px;
+    cursor:pointer; background:none; border:none; font-family:'Inter',sans-serif; width:100%;
+  }
+
+  .legend{ max-width: 620px; margin: 30px auto 0; display:flex; gap: 10px; justify-content:center; flex-wrap:wrap; }
+  .legend span{
+    font-family:'IBM Plex Mono', monospace; font-size: 10.5px; color: var(--muted);
+    background: var(--paper); border:1px solid var(--line); padding: 6px 10px; border-radius: 999px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .opt.rank-1 .pulse i, .dial .ring{ animation:none; }
+    .opt, .sim{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="wrap">
+    <p class="meta">Estructura genérica — sin marca de cliente</p>
+    <h1 class="title" id="pageTitle">Formulario de captura · con fricción cualitativa</h1>
+    <p class="sub" id="pageSub">Mismos campos base de siempre, más dos preguntas abiertas que filtran intención real sin costo ni examen.</p>
+
+    <div class="rail">
+      <div class="step active" id="rail-1"><div class="dot">1</div></div>
+      <div class="bar"></div>
+      <div class="step" id="rail-2"><div class="dot">2</div></div>
+    </div>
+
+    <!-- TOGGLE (solo visible en paso 2) -->
+    <div class="toggle state-after" id="toggle" style="display:none;">
+      <div class="thumb"></div>
+      <button id="btn-before" onclick="setState('before')">Modelo actual</button>
+      <button id="btn-after" class="active" onclick="setState('after')">Modelo Imán</button>
+    </div>
+
+    <div class="frame">
+
+      <!-- PASO 1: FORMULARIO -->
+      <div id="panel-form">
+        <div class="form-head">
+          <h2>Cuéntanos qué buscas</h2>
+          <p>Los datos básicos capturan al lead. Las preguntas abiertas de abajo son las que separan al curioso del candidato real — antes de que le cueste tiempo a un asesor.</p>
+        </div>
+
+        <div class="row2">
+          <div class="field">
+            <label>Nombre <span class="req">*</span></label>
+            <input type="text" id="f-nombre" placeholder="María">
+          </div>
+          <div class="field">
+            <label>Apellido <span class="req">*</span></label>
+            <input type="text" id="f-apellido" placeholder="Gómez">
+          </div>
+        </div>
+        <div class="field">
+          <label>Correo <span class="req">*</span></label>
+          <input type="email" id="f-correo" placeholder="maria@correo.com">
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label>Teléfono <span class="req">*</span></label>
+            <input type="tel" id="f-telefono" placeholder="+57 300 000 0000">
+          </div>
+          <div class="field">
+            <label>Programa de interés <span class="req">*</span></label>
+            <select id="f-programa">
+              <option>Medicina</option>
+              <option>Enfermería</option>
+              <option>Psicología</option>
+              <option>Especialización en Epidemiología</option>
+              <option>Otro programa</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="qual-block">
+          <div class="qual-eyebrow"><span class="pip"></span>Preguntas abiertas — filtran intención, no dato</div>
+          <div class="field">
+            <label>¿Por qué te interesa este programa ahora? <span class="req">*</span></label>
+            <textarea id="f-q1" placeholder="Cuéntanos brevemente qué te motiva…"></textarea>
+          </div>
+          <div class="field">
+            <label>¿Qué esperas lograr al terminarlo? <span class="req">*</span></label>
+            <textarea id="f-q2" placeholder="Tu respuesta en tus palabras…"></textarea>
+          </div>
+        </div>
+
+        <label class="consent">
+          <input type="checkbox" id="f-consent">
+          <span>He leído y acepto la autorización de tratamiento de datos personales.</span>
+        </label>
+
+        <button class="submit-btn" onclick="submitForm()">Enviar</button>
+      </div>
+
+      <!-- PASO 2: GRACIAS -->
+      <div id="panel-thanks" style="display:none;">
+
+        <!-- ANTES -->
+        <div id="panel-before" style="display:none;">
+          <div class="before-panel">
+            <div class="before-icon">✕</div>
+            <h2>Gracias por tu interés</h2>
+            <p>Uno de nuestros asesores se pondrá en contacto contigo pronto para brindarte más información sobre el programa de <b style="color:var(--ink)" id="before-programa">{{Programa de interés}}</b>.</p>
+            <div class="before-stamp"><span class="dot"></span> Entra a cola de llamadas salientes</div>
+            <div class="before-footnote">El prospecto no controla cuándo ni cómo lo contactan. Es el punto de mayor intención de todo su recorrido — y hoy es un vacío pasivo.</div>
+          </div>
+        </div>
+
+        <!-- DESPUÉS -->
+        <div id="panel-after">
+          <div class="after-head">
+            <p class="hi">¡Listo, <span id="after-nombre">{{Nombre}}</span>! Ya casi terminamos.</p>
+            <p>Elige cómo prefieres que sigamos la conversación sobre <b id="after-programa">{{Programa de interés}}</b></p>
+          </div>
+
+          <div class="ladder">
+
+            <button class="opt rank-1" onclick="toggleSim('sim-wa', this)">
+              <div class="pulse"><i></i>ahora</div>
+              <div class="ic">●</div>
+              <div class="body">
+                <p class="label">Escríbeme por WhatsApp</p>
+                <p class="desc">Respuesta inmediata, por chat</p>
+              </div>
+              <div class="arrow">›</div>
+            </button>
+            <div class="sim" id="sim-wa">
+              <div class="sim-inner">
+                <p class="sim-eyebrow">Vista previa · WhatsApp</p>
+                <div class="chat-bubble" id="wa-bubble">Hola, quiero más información sobre {{Programa de interés}} 👋</div>
+                <p class="sim-note">Se abre wa.me con el mensaje precargado. El asesor prioriza respuesta &lt; 5 min.</p>
+              </div>
+            </div>
+
+            <button class="opt rank-2" onclick="toggleSim('sim-cal', this)">
+              <div class="ic">▤</div>
+              <div class="body">
+                <p class="label">Agenda tu llamada cuando te sirva</p>
+                <p class="desc">Vía Calendly — eliges día y hora</p>
+              </div>
+              <div class="arrow">›</div>
+            </button>
+            <div class="sim" id="sim-cal">
+              <div class="sim-inner">
+                <p class="sim-eyebrow">Vista previa · Calendly embebido</p>
+                <div class="cal-widget">
+                  <div class="cal-widget-head"><span class="cico"></span> calendly.com/admisiones · 30 min</div>
+                  <div class="cal-body">
+                    <div class="cal-grid">
+                      <div class="cal-slot">10:00</div>
+                      <div class="cal-slot sel">11:30</div>
+                      <div class="cal-slot">2:00</div>
+                      <div class="cal-slot">4:30</div>
+                    </div>
+                  </div>
+                </div>
+                <p class="sim-note">Widget real de Calendly embebido en la página — no redirige a otra pestaña. El asesor recibe la cita con hora exacta.</p>
+              </div>
+            </div>
+
+            <button class="opt rank-3" onclick="toggleSim('sim-tel', this)">
+              <div class="ic">☎</div>
+              <div class="body">
+                <p class="label">Llamar directo</p>
+                <p class="desc">Marca ya desde tu celular</p>
+              </div>
+              <div class="arrow">›</div>
+            </button>
+            <div class="sim" id="sim-tel">
+              <div class="sim-inner">
+                <div class="dial">
+                  <div class="ring">☎</div>
+                  <div>
+                    <p style="margin:0;font-weight:600;font-size:13px;">Marcando línea de admisiones…</p>
+                    <p class="sim-note" style="margin:2px 0 0;">tel: dispara el marcador nativo del celular.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button class="opt rank-4" onclick="toggleSim('sim-fb', this)">
+              <p class="label">Prefiero que me llamen</p>
+            </button>
+            <div class="sim" id="sim-fb">
+              <div class="sim-inner">
+                <div class="mini-form">
+                  <input type="text" placeholder="Mejor horario para llamarte" disabled>
+                  <button>Enviar</button>
+                </div>
+                <p class="sim-note">Único botón que entra al flujo tradicional de seguimiento (9 pasos). Fallback, no default.</p>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="trust"><span class="seal">✓</span> Institución acreditada · dato configurable por cliente</div>
+        </div>
+
+        <button class="back-link" onclick="backToForm()">← Volver al formulario</button>
+      </div>
+
+    </div>
+
+    <div class="legend" id="legend-form">
+      <span>2 preguntas abiertas = fricción cualitativa</span>
+      <span>Sin costo, sin examen</span>
+      <span>Filtra intención, no solo datos</span>
+    </div>
+    <div class="legend" id="legend-thanks" style="display:none;">
+      <span>Tamaño = jerarquía de fricción</span>
+      <span>{{ }} = variable por cliente</span>
+      <span>Un solo objetivo por pantalla</span>
+    </div>
+  </div>
+
+<script>
+  function submitForm(){
+    const nombre = document.getElementById('f-nombre').value.trim() || 'María';
+    const programa = document.getElementById('f-programa').value || 'Medicina';
+
+    document.getElementById('after-nombre').textContent = nombre;
+    document.getElementById('after-programa').textContent = programa;
+    document.getElementById('before-programa').textContent = programa;
+    document.getElementById('wa-bubble').textContent = 'Hola, quiero más información sobre ' + programa + ' 👋';
+
+    document.getElementById('panel-form').style.display = 'none';
+    document.getElementById('panel-thanks').style.display = '';
+    document.getElementById('toggle').style.display = 'flex';
+    document.getElementById('legend-form').style.display = 'none';
+    document.getElementById('legend-thanks').style.display = 'flex';
+
+    document.getElementById('rail-1').classList.remove('active');
+    document.getElementById('rail-1').classList.add('done');
+    document.getElementById('rail-1').querySelector('.dot').textContent = '✓';
+    document.getElementById('rail-2').classList.add('active');
+
+    document.getElementById('pageTitle').textContent = 'Página de gracias · Efecto Imán®';
+    document.getElementById('pageSub').textContent = 'Alterna el estado para comparar el modelo actual contra el propuesto.';
+
+    setState('after');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function backToForm(){
+    document.getElementById('panel-form').style.display = '';
+    document.getElementById('panel-thanks').style.display = 'none';
+    document.getElementById('toggle').style.display = 'none';
+    document.getElementById('legend-form').style.display = 'flex';
+    document.getElementById('legend-thanks').style.display = 'none';
+
+    document.getElementById('rail-1').classList.add('active');
+    document.getElementById('rail-1').classList.remove('done');
+    document.getElementById('rail-1').querySelector('.dot').textContent = '1';
+    document.getElementById('rail-2').classList.remove('active');
+
+    document.getElementById('pageTitle').textContent = 'Formulario de captura · con fricción cualitativa';
+    document.getElementById('pageSub').textContent = 'Mismos campos base de siempre, más dos preguntas abiertas que filtran intención real sin costo ni examen.';
+
+    document.querySelectorAll('.sim.open').forEach(s => s.classList.remove('open'));
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function setState(state){
+    const toggle = document.getElementById('toggle');
+    const bBefore = document.getElementById('btn-before');
+    const bAfter = document.getElementById('btn-after');
+    const pBefore = document.getElementById('panel-before');
+    const pAfter = document.getElementById('panel-after');
+    if(state==='before'){
+      toggle.classList.remove('state-after');
+      bBefore.classList.add('active'); bAfter.classList.remove('active');
+      pBefore.style.display=''; pAfter.style.display='none';
+    } else {
+      toggle.classList.add('state-after');
+      bAfter.classList.add('active'); bBefore.classList.remove('active');
+      pBefore.style.display='none'; pAfter.style.display='';
+    }
+  }
+
+  function toggleSim(id, btn){
+    const el = document.getElementById(id);
+    const isOpen = el.classList.contains('open');
+    document.querySelectorAll('.sim.open').forEach(s => { if(s!==el){ s.classList.remove('open'); } });
+    if(isOpen){ el.classList.remove('open'); }
+    else { el.classList.add('open'); }
+  }
+</script>
+
+</body>
+</html>

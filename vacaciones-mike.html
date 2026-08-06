@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cobertura de Cuentas — Vacaciones Mike</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#111111;
+    --charcoal:#1c1c1c;
+    --yellow:#FFC000;
+    --yellow-soft:#fff6dd;
+    --gray-bg:#f5f5f5;
+    --gray-line:#e2e2e2;
+    --gray-text:#5c5c5c;
+    --red:#e0453a;
+    --white:#ffffff;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Poppins', sans-serif;
+    background:var(--gray-bg);
+    color:var(--black);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;}
+
+  /* ---------- LAYOUT ---------- */
+  .app{
+    display:flex;
+    min-height:100vh;
+  }
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    width:280px;
+    flex-shrink:0;
+    background:var(--black);
+    color:var(--white);
+    padding:28px 18px 24px;
+    position:sticky;
+    top:0;
+    height:100vh;
+    overflow-y:auto;
+  }
+  .sidebar-header{
+    padding:0 10px 22px;
+    border-bottom:1px solid #2c2c2c;
+    margin-bottom:18px;
+  }
+  .sidebar-header .tag{
+    display:inline-block;
+    background:var(--yellow);
+    color:var(--black);
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border-radius:4px;
+    margin-bottom:10px;
+  }
+  .sidebar-header h1{
+    font-size:19px;
+    font-weight:700;
+    line-height:1.25;
+  }
+  .sidebar-header p{
+    font-size:12px;
+    color:#9a9a9a;
+    margin-top:6px;
+    line-height:1.5;
+  }
+  .nav-group-label{
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:#7a7a7a;
+    padding:14px 10px 8px;
+    font-weight:600;
+  }
+  .nav-item{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:8px;
+    width:100%;
+    text-align:left;
+    background:none;
+    border:none;
+    color:#d8d8d8;
+    font-family:'Poppins',sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    padding:10px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    transition:background .15s ease, color .15s ease;
+  }
+  .nav-item:hover{ background:#232323; color:var(--white); }
+  .nav-item.active{ background:var(--yellow); color:var(--black); font-weight:600; }
+  .nav-item .resp{
+    font-size:10px;
+    color:#8f8f8f;
+    font-weight:400;
+  }
+  .nav-item.active .resp{ color:#3a3a3a; }
+  .nav-item .dot{
+    width:6px; height:6px; border-radius:50%;
+    background:var(--red);
+    flex-shrink:0;
+    display:none;
+  }
+  .nav-item.has-urgent .dot{ display:inline-block; }
+  .nav-item.active .dot{ background:var(--black); }
+
+  /* ---------- MAIN ---------- */
+  .main{
+    flex:1;
+    padding:36px 44px 60px;
+    max-width:980px;
+  }
+  .topbar{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    margin-bottom:26px;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  .topbar h2{ font-size:15px; color:var(--gray-text); font-weight:500; }
+  .topbar .badge{
+    background:var(--white);
+    border:1px solid var(--gray-line);
+    border-radius:20px;
+    padding:6px 14px;
+    font-size:12px;
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .badge .sq{ width:8px; height:8px; border-radius:2px; background:var(--yellow); }
+
+  .client-card{ display:none; }
+  .client-card.active{ display:block; animation:fadeIn .25s ease; }
+  @keyframes fadeIn{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);} }
+
+  .client-head{
+    background:var(--black);
+    border-radius:16px;
+    padding:26px 28px;
+    color:var(--white);
+    margin-bottom:22px;
+    position:relative;
+    overflow:hidden;
+  }
+  .client-head::after{
+    content:"";
+    position:absolute;
+    right:-40px; top:-40px;
+    width:160px; height:160px;
+    background:var(--yellow);
+    opacity:.12;
+    border-radius:50%;
+  }
+  .client-head h2{ font-size:26px; font-weight:800; margin-bottom:10px; }
+  .meta-row{ display:flex; gap:22px; flex-wrap:wrap; font-size:13px; }
+  .meta-item{ display:flex; flex-direction:column; gap:2px; }
+  .meta-item .label{ color:#9a9a9a; font-size:10.5px; text-transform:uppercase; letter-spacing:.06em; }
+  .meta-item .value{ font-weight:600; color:var(--yellow); }
+
+  .section{
+    background:var(--white);
+    border:1px solid var(--gray-line);
+    border-radius:14px;
+    padding:22px 24px;
+    margin-bottom:18px;
+  }
+  .section h3{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:var(--black);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:14px;
+    font-weight:700;
+  }
+  .section h3 .icon{
+    width:22px; height:22px;
+    border-radius:6px;
+    background:var(--yellow-soft);
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px;
+  }
+
+  .ctx-list{ list-style:none; }
+  .ctx-list li{
+    position:relative;
+    padding:9px 0 9px 20px;
+    font-size:14px;
+    line-height:1.55;
+    color:#2b2b2b;
+    border-bottom:1px dashed var(--gray-line);
+  }
+  .ctx-list li:last-child{ border-bottom:none; }
+  .ctx-list li::before{
+    content:"";
+    position:absolute;
+    left:0; top:17px;
+    width:6px; height:6px;
+    border-radius:50%;
+    background:var(--yellow);
+  }
+  .ctx-list li.urgent{ background:linear-gradient(90deg, #fff3f2, transparent 60%); border-radius:6px; }
+  .ctx-list li.urgent::before{ background:var(--red); }
+  .ctx-list li.urgent strong{ color:var(--red); }
+
+  .task-list{ list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .task-list li{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    font-size:14px;
+    padding:10px 12px;
+    border:1px solid var(--gray-line);
+    border-radius:10px;
+    background:#fafafa;
+  }
+  .task-list li.urgent{ border-color:#f3c6c2; background:#fff5f4; }
+  .task-list .chk{
+    width:16px; height:16px; margin-top:2px;
+    border:1.5px solid #b8b8b8; border-radius:4px;
+    flex-shrink:0;
+  }
+  .task-list li.urgent .chk{ border-color:var(--red); }
+  .tag-urgent{
+    display:inline-block;
+    background:var(--red);
+    color:#fff;
+    font-size:9.5px;
+    font-weight:700;
+    letter-spacing:.05em;
+    padding:2px 6px;
+    border-radius:4px;
+    margin-right:6px;
+    vertical-align:middle;
+  }
+
+  .link-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(230px,1fr));
+    gap:10px;
+  }
+  .link-card{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 14px;
+    background:#fafafa;
+    border:1px solid var(--gray-line);
+    border-radius:10px;
+    text-decoration:none;
+    color:var(--black);
+    font-size:13px;
+    font-weight:600;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .link-card:hover{ border-color:var(--yellow); background:var(--yellow-soft); }
+  .link-card .ic{
+    width:30px; height:30px; border-radius:8px;
+    background:var(--black); color:var(--yellow);
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; flex-shrink:0;
+  }
+  .link-card .txt{ display:flex; flex-direction:column; gap:1px; }
+  .link-card .txt small{ font-weight:400; color:var(--gray-text); font-size:10.5px; }
+
+  .note-box{
+    background:var(--yellow-soft);
+    border:1px solid #ffe6a3;
+    border-radius:12px;
+    padding:16px 18px;
+    font-size:13.5px;
+    line-height:1.6;
+    color:#3a2e00;
+  }
+
+  footer.page-footer{
+    margin-top:30px;
+    font-size:12px;
+    color:#9a9a9a;
+    text-align:center;
+  }
+
+  @media (max-width: 860px){
+    .app{ flex-direction:column; }
+    .sidebar{ width:100%; height:auto; position:relative; }
+    .main{ padding:24px 18px 40px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="tag">ADCOM · Cobertura</span>
+      <h1>Vacaciones Mike</h1>
+      <p>Contexto, enlaces y pendientes por cuenta. Actualiza esto si algo cambia mientras estoy fuera.</p>
+    </div>
+
+    <div class="nav-group-label">Daniel Barrera</div>
+    <div id="nav-daniel"></div>
+
+    <div class="nav-group-label">Eros</div>
+    <div id="nav-eros"></div>
+
+    <div class="nav-group-label">General ADCOM</div>
+    <button class="nav-item" data-target="general">
+      <span>Fuentes generales</span>
+    </button>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h2 id="topbar-title">Selecciona una cuenta en el menú</h2>
+      <div class="badge"><span class="sq"></span> <span id="badge-count"></span></div>
+    </div>
+
+    <div id="cards-container"></div>
+
+    <footer class="page-footer">Documento de cobertura mientras Mike está de vacaciones · ADCOM</footer>
+  </main>
+</div>
+
+<script>
+const CLIENTS = [
+  {
+    id:"compensar",
+    name:"Compensar",
+    responsable:"Daniel Barrera",
+    ejecutivo:"Andrés",
+    context:[
+      {text:"Actualmente se bajó el presupuesto en toda la oferta, solo debe tener mayor presupuesto la BIS (pregrados virtuales). Este presupuesto ya está ajustado, solo hay que hacer seguimiento.", urgent:false},
+      {text:"Está pendiente que envíen las piezas de la BIS. Se implementan por programa en cada campaña activa. Hay que montar una campaña general de virtual pregrados (la ejecuta Felipe). Listado de URLs para tomar las de la campaña general en el sheet de piezas.", urgent:false},
+    ],
+    tasks:[
+      {text:"SUPER URGENTE: actualizar manualmente el script de la fuente de datos antes de ver la data en el seguimiento semanal.", urgent:true},
+      {text:"Asegurarse que envíen las bases del CRM para que Jhonny actualice la data antes de cada seguimiento.", urgent:true},
+      {text:"Reunión pendiente con tecnología para instalar la API en el servidor — hay que hacerle push a Edwin.", urgent:false},
+      {text:"Ruta estratégica pendiente.", urgent:false},
+    ],
+    links:[
+      {label:"Forecast — inversión mes a mes", sub:"Google Sheets", url:"https://docs.google.com/spreadsheets/d/1oB7yzN9GDw0_9nHz7vLIdIBKE5DScrTUSFFNIWGNODA/edit?gid=0#gid=0", ic:"📊"},
+      {label:"Portal del cliente", sub:"Seguimiento semanal", url:"https://adcom-forecast.github.io/compensar/", ic:"🌐"},
+      {label:"Script fuente de datos", sub:"Actualizar manualmente", url:"https://docs.google.com/spreadsheets/d/1xmmiAs6xs3CDatpA7hmgh7KJdv85vnznnxc6WOMjiUU/edit?gid=1728433049#gid=1728433049", ic:"⚙️"},
+      {label:"Dashboard Power BI", sub:"Data en tiempo real", url:"https://app.powerbi.com/groups/me/reports/a2f89047-c560-4190-9eeb-d0f4ed4ae1b9/ReportSectionb2d4be60e6d47336e02b?ctid=4bf38ea2-832d-4552-b508-421570da43ff&experience=power-bi&clientSideAuth=0", ic:"📈"},
+      {label:"Sheet de piezas / URLs BIS", sub:"Para campaña general virtual", url:"https://docs.google.com/spreadsheets/d/18nj7-uSUKwUPUaqvrxdXaEj_ZyNUA3E6KigQAzqq_V0/edit?gid=0#gid=0", ic:"🎨"},
+    ]
+  },
+  {
+    id:"catolica",
+    name:"Católica",
+    responsable:"Daniel Barrera",
+    ejecutivo:"Cata",
+    context:[
+      {text:"Campañas de pregrados van con buen presupuesto hasta finales de agosto.", urgent:false},
+      {text:"Posgrados en Derecho necesitan mayor push hasta mitad de mes.", urgent:false},
+      {text:"La nueva maestría en Gestión Económica debe consumir 10 millones en total, adicionales al presupuesto.", urgent:false},
+      {text:"Verificar la fecha de finalización de la campaña 'Vive la U' para apagarla.", urgent:false},
+    ],
+    tasks:[
+      {text:"Tarea manual diaria: enviar a Jhonny las bases de leads captados desde Meta para que las cargue al CRM.", urgent:true},
+      {text:"Actualizar manualmente leads y matrículas en la fuente de datos para que se vean en el tablero de seguimiento semanal, y dar clic en 'normalizar'.", urgent:true},
+    ],
+    links:[
+      {label:"Forecast 2025", sub:"Presupuesto mensual", url:"https://docs.google.com/spreadsheets/u/0/d/1Zl3K7tvYj3FC6RzkgNux4n5SScDQ5E3rAFABum2cIuM/edit", ic:"📊"},
+      {label:"Portal del cliente", sub:"Seguimiento", url:"https://adcom-forecast.github.io/catolica/", ic:"🌐"},
+      {label:"Fuente de datos", sub:"Leads y matrículas — actualizar manual", url:"https://docs.google.com/spreadsheets/u/0/d/1uIBe2IadpAWIpVbqUp0RO8THfEw8Mjlrl_1VvORw_rs/edit", ic:"⚙️"},
+      {label:"Leads Center Meta", sub:"Base diaria para Jhonny", url:"https://business.facebook.com/latest/leads_center?asset_id=331708666852442&ir_qe_exposed=1&business_id=183109878839322&nav_source=flyout_menu&nav_id=1868033144", ic:"📥"},
+    ]
+  },
+  {
+    id:"corpas",
+    name:"Corpas",
+    responsable:"Eros",
+    ejecutivo:"Cata",
+    context:[
+      {text:"Las campañas deben tener push hasta el 15 de agosto.", urgent:false},
+      {text:"La nueva maestría va hasta final de mes, pero falta confirmación. Confirmar en el próximo seguimiento si se continúa dando inversión o no.", urgent:false},
+      {text:"Ruta estratégica ya hecha, falta presentarla.", urgent:false},
+    ],
+    tasks:[
+      {text:"Actualizar la base de leads y matrículas en la fuente de datos antes de cada seguimiento (Eros sabe hacerlo).", urgent:true},
+    ],
+    links:[
+      {label:"Fuente de datos", sub:"Leads y matrículas", url:"https://docs.google.com/spreadsheets/u/0/d/12-tP-61OKnLdx1wONS0YT0q7O19eZ8V3ZrTDChOmyGo/edit", ic:"⚙️"},
+      {label:"Portal del cliente", sub:"Seguimiento", url:"https://adcom-forecast.github.io/corpas/", ic:"🌐"},
+      {label:"Forecast 2025/2026", sub:"Inversión mensual", url:"https://docs.google.com/spreadsheets/u/0/d/1B9rms3VL1o3INwbeCd3EO8QOmUrQVf-kMi6ac50YV6E/edit", ic:"📊"},
+    ]
+  },
+  {
+    id:"uan",
+    name:"UAN",
+    responsable:"Daniel Barrera",
+    ejecutivo:"Andrés",
+    context:[
+      {text:"Las campañas están apagadas por petición del cliente; no pueden gestionar leads y se está ajustando el proceso de landing y captación.", urgent:false},
+      {text:"Pendiente reunión con Felipe y el equipo de IT de la universidad para empezar con el Efecto Imán.", urgent:false},
+      {text:"Distribución de presupuesto pendiente porque no han definido ciudades y oferta — el periodo ya está en el forecast, solo falta cambiar valores y programas.", urgent:false},
+    ],
+    tasks:[
+      {text:"En el forecast 2026-2, Diana debe confirmar si se sigue así o no. En julio se invirtieron $1.624.656 que hay que nivelar con otros meses, además de ajustar agosto (se gastó mucho en la primera semana).", urgent:true},
+      {text:"Ruta estratégica pendiente — la hace Mike y la deja en el portal.", urgent:false},
+    ],
+    links:[
+      {label:"Portal del cliente", sub:"Reportes mensuales", url:"https://adcom-forecast.github.io/uan/", ic:"🌐"},
+      {label:"Forecast 2026-2", sub:"Inversión mensual", url:"https://docs.google.com/spreadsheets/u/0/d/1ca-eqFFlV8sukSFofTk9p4pWF8i_ce4Ihw7-4IG8l2Y/edit", ic:"📊"},
+    ]
+  },
+  {
+    id:"eia",
+    name:"EIA",
+    responsable:"Daniel Barrera",
+    ejecutivo:"Tomás",
+    context:[
+      {text:"Actualmente solo hay campañas generales y Medicina activo. Ya se presentó la ruta y fue aprobado lo del Imán.", urgent:false},
+      {text:"Se necesita la reunión con Felipe e IT — coordinarla con Tomás.", urgent:false},
+      {text:"Las campañas se encienden cuando haya piezas nuevas para lanzar. Revisar si los formularios de Meta dicen algo de 2026-2 para cambiarlos (probablemente no).", urgent:false},
+      {text:"Pendiente todo el contenido y landings para empezar.", urgent:false},
+      {text:"Ruta estratégica ya se presentó.", urgent:false},
+    ],
+    tasks:[
+      {text:"TODAS las campañas deben quedar ENCENDIDAS el 20 de agosto, con o sin piezas nuevas.", urgent:true},
+    ],
+    links:[
+      {label:"Forecast 2025", sub:"Distribución de presupuesto", url:"https://docs.google.com/spreadsheets/u/0/d/1VAShXgmYygP6x1B_s2J13Qw4kIjE31_yuTH7B63UHC0/edit", ic:"📊"},
+      {label:"Portal del cliente", sub:"Distribución completa", url:"https://adcom-forecast.github.io/eia/", ic:"🌐"},
+      {label:"Fuente de datos", sub:"", url:"https://docs.google.com/spreadsheets/u/0/d/1J862C3EvVo9XEBGq0nsfPjNRKD5kTqIEu8hZFWt4Aks/edit", ic:"⚙️"},
+    ]
+  },
+  {
+    id:"adriana",
+    name:"Adriana Duque",
+    responsable:"Daniel Barrera",
+    ejecutivo:"Andrés",
+    context:[
+      {text:"Cuenta always-on de campañas, rodando normal. Presupuesto mensual de 1.5 (millones), actualmente al mínimo.", urgent:false},
+      {text:"Aquí solo hay que hacer seguimiento, nada más.", urgent:false},
+    ],
+    tasks:[],
+    links:[
+      {label:"Looker Studio", sub:"Seguimiento", url:"https://datastudio.google.com/u/0/reporting/f4070341-3643-492e-ae32-ce82fb8e846d/page/p_mc38nsg2jd", ic:"📈"},
+    ]
+  },
+  {
+    id:"susuerte",
+    name:"SuSuerte",
+    responsable:"Daniel Barrera",
+    ejecutivo:"Sin ejecutivo asignado",
+    context:[
+      {text:"Campañas rodando. Felipe tiene contexto — si mandan rotación de anuncios, él puede hacerlo y se envía reporte de implementación.", urgent:false},
+      {text:"Sebas está en el grupo de WhatsApp del cliente.", urgent:false},
+    ],
+    tasks:[
+      {text:"Si se necesita recargar dinero en la cuenta: sacar el enlace de PSE y pasarlo a Johana. Siempre se recargan 3 millones.", urgent:false},
+    ],
+    links:[
+      {label:"Looker Studio", sub:"Si piden reporte", url:"https://datastudio.google.com/u/0/reporting/12f3355b-3e5b-4acb-a3d0-adc094a3bc43", ic:"📈"},
+    ]
+  },
+  {
+    id:"huevos",
+    name:"Huevos Oro",
+    responsable:"Daniel Barrera",
+    ejecutivo:"Cata",
+    context:[
+      {text:"Campañas always-on, ya ajustadas al presupuesto de este mes (Agosto V1).", urgent:false},
+      {text:"Ya se lanzaron las nuevas piezas.", urgent:false},
+    ],
+    tasks:[
+      {text:"Urgente: estar pendiente de que Andrea haga los promopost. Son $350k que ya se restaron al presupuesto de campañas.", urgent:true},
+    ],
+    links:[
+      {label:"Presupuesto Agosto V1", sub:"Ajuste mensual", url:"https://docs.google.com/spreadsheets/d/1lRGr4tLMqcqUMrL6MELIfuBII7olU58OInZT8qOrlTI/edit?gid=1907649230#gid=1907649230", ic:"📊"},
+      {label:"Looker Studio", sub:"Seguimiento", url:"https://datastudio.google.com/u/0/reporting/57c09853-9372-46e8-a3e9-d7a907f72652", ic:"📈"},
+    ]
+  },
+  {
+    id:"genius",
+    name:"GeniusBet",
+    responsable:"Daniel Barrera",
+    ejecutivo:"Andrés",
+    context:[
+      {text:"Se rotaron las piezas de deportivas en registro y apuesta — hay que ver si ese costo es mayor o menor a las piezas viejas.", urgent:false},
+      {text:"En casino se dejaron rodando las viejas y las nuevas para ver el sistema de cortes. Tema para hablar en el seguimiento.", urgent:false},
+      {text:"Programática ajustada al presupuesto, pero asegurarse de que no gaste de más sobre lo presupuestado: 2.040 USD.", urgent:false},
+      {text:"Reto de este mes: llegar a un 6% de conversión desde anuncios.", urgent:false},
+      {text:"Felipe tiene contexto y puede ejecutar cosas en la cuenta.", urgent:false},
+    ],
+    tasks:[
+      {text:"La fuente de datos requiere actualizar todos los scripts — no trae la data de conversión automática. Con eso el Looker queda ok.", urgent:true},
+    ],
+    links:[
+      {label:"Looker Studio", sub:"Seguimiento", url:"https://datastudio.google.com/u/0/reporting/2e043525-486a-42ec-94ba-a58e5b753c52/page/p_tu6fzi6xsd", ic:"📈"},
+      {label:"Fuente de datos", sub:"Actualizar scripts", url:"https://docs.google.com/spreadsheets/u/0/d/1bl81VFv_xabxCWt9_n3ZVymxoGd7OyLPIDfQgLSEryY/edit", ic:"⚙️"},
+      {label:"Flow de medios", sub:"", url:"https://docs.google.com/spreadsheets/u/0/d/1KH1cI6z7iDI9BiLFSEJ21qntVCqgrh4HVUvO2jbAfCc/edit", ic:"🗂️"},
+    ]
+  },
+  {
+    id:"baloto",
+    name:"Baloto",
+    responsable:"Eros",
+    ejecutivo:"—",
+    context:[
+      {text:"Esta cuenta la lleva Eros al 100%.", urgent:false},
+    ],
+    tasks:[],
+    links:[
+      {label:"Fuente de datos", sub:"", url:"https://docs.google.com/spreadsheets/u/0/d/1zEv8npIyHnoaEXKZDRh-vpyo88RU0WmKUgSKwSYzaMU/edit", ic:"⚙️"},
+      {label:"Looker Studio", sub:"Seguimiento", url:"https://datastudio.google.com/u/0/reporting/91ad73cb-89a0-4b4a-85c2-92c51ef5ff8f", ic:"📈"},
+      {label:"Flow de medios", sub:"", url:"https://docs.google.com/spreadsheets/u/0/d/1D2uyRusvbWzsAczN9pdkXx7DnCSHia4_ifYFvfmvy1E/edit", ic:"🗂️"},
+    ]
+  },
+  {
+    id:"megaloto",
+    name:"Megaloto",
+    responsable:"Eros",
+    ejecutivo:"—",
+    context:[
+      {text:"Esta cuenta la lleva Eros al 100%.", urgent:false},
+    ],
+    tasks:[],
+    links:[
+      {label:"Fuente de datos", sub:"", url:"https://docs.google.com/spreadsheets/u/0/d/1XLyfDF_NpSMau_gvgVSF9Fc6h3EuOHHdhkoTbRe7tms/edit", ic:"⚙️"},
+      {label:"Looker Studio", sub:"Seguimiento", url:"https://datastudio.google.com/u/0/reporting/2f49e51d-0165-493c-9fce-70c58fc4f898", ic:"📈"},
+    ]
+  },
+  {
+    id:"nexos",
+    name:"Nexos",
+    responsable:"Daniel Barrera o Sebas",
+    ejecutivo:"Cata",
+    context:[
+      {text:"Campañas always-on de captación y colocación. Se subió el presupuesto en colocación, necesitan captar inmuebles para vender o arrendar — ya está ajustado en plataforma.", urgent:false},
+      {text:"Presupuesto: 2 millones mensuales.", urgent:false},
+    ],
+    tasks:[
+      {text:"Faltan las piezas estáticas de colocación para lanzarlas en la campaña.", urgent:false},
+      {text:"Hacer seguimiento de si están teniendo prospectos interesados o inmuebles del ticket que requieren.", urgent:false},
+    ],
+    links:[
+      {label:"Looker Studio", sub:"Seguimiento", url:"https://datastudio.google.com/u/0/reporting/4c27bbee-4d83-4794-a045-83e6d4a37a21", ic:"📈"},
+    ]
+  },
+];
+
+const GENERAL = {
+  note:"Daniel tiene acceso a todos los repositorios de Mike — cualquier duda técnica adicional se puede resolver desde ahí.",
+  links:[
+    {label:"Fuente General ADCOM", sub:"Control de presupuestos", url:"https://docs.google.com/spreadsheets/u/0/d/1jhv8v4r68NIlTdb7NsTkgHHdmfVUuRTBCOdWzJUBJek/edit", ic:"📁"},
+    {label:"Fuente Programática Basis", sub:"Control de presupuestos", url:"https://docs.google.com/spreadsheets/u/0/d/1OGUze14Rv7wgZsYEXo6EwuGDm033NXbNECdrEkeF9mk/edit", ic:"📁"},
+  ]
+};
+
+const navDaniel = document.getElementById('nav-daniel');
+const navEros = document.getElementById('nav-eros');
+const cardsContainer = document.getElementById('cards-container');
+const topbarTitle = document.getElementById('topbar-title');
+const badgeCount = document.getElementById('badge-count');
+
+function buildNavItem(client){
+  const btn = document.createElement('button');
+  const hasUrgent = client.tasks.some(t=>t.urgent) || client.context.some(c=>c.urgent);
+  btn.className = 'nav-item' + (hasUrgent ? ' has-urgent' : '');
+  btn.dataset.target = client.id;
+  btn.innerHTML = `<span>${client.name}</span><span class="dot"></span>`;
+  btn.addEventListener('click', ()=> showClient(client.id));
+  return btn;
+}
+
+CLIENTS.filter(c => c.responsable.includes('Daniel')).forEach(c => navDaniel.appendChild(buildNavItem(c)));
+CLIENTS.filter(c => c.responsable === 'Eros').forEach(c => navEros.appendChild(buildNavItem(c)));
+
+function buildCard(client){
+  const div = document.createElement('div');
+  div.className = 'client-card';
+  div.id = 'card-' + client.id;
+
+  const urgentTasks = client.tasks.filter(t=>t.urgent).length;
+
+  div.innerHTML = `
+    <div class="client-head">
+      <h2>${client.name}</h2>
+      <div class="meta-row">
+        <div class="meta-item"><span class="label">Responsable</span><span class="value">${client.responsable}</span></div>
+        <div class="meta-item"><span class="label">Ejecutivo/a</span><span class="value">${client.ejecutivo}</span></div>
+      </div>
+    </div>
+
+    ${client.context.length ? `
+    <div class="section">
+      <h3><span class="icon">📌</span> Contexto actual</h3>
+      <ul class="ctx-list">
+        ${client.context.map(c => `<li class="${c.urgent ? 'urgent' : ''}">${c.text}</li>`).join('')}
+      </ul>
+    </div>` : ''}
+
+    ${client.tasks.length ? `
+    <div class="section">
+      <h3><span class="icon">✅</span> Pendientes / a ejecutar</h3>
+      <ul class="task-list">
+        ${client.tasks.map(t => `<li class="${t.urgent ? 'urgent' : ''}"><span class="chk"></span><span>${t.urgent ? '<span class="tag-urgent">URGENTE</span>' : ''}${t.text}</span></li>`).join('')}
+      </ul>
+    </div>` : ''}
+
+    ${client.links.length ? `
+    <div class="section">
+      <h3><span class="icon">🔗</span> Enlaces clave</h3>
+      <div class="link-grid">
+        ${client.links.map(l => `
+          <a class="link-card" href="${l.url}" target="_blank" rel="noopener">
+            <span class="ic">${l.ic}</span>
+            <span class="txt"><span>${l.label}</span>${l.sub ? `<small>${l.sub}</small>` : ''}</span>
+          </a>`).join('')}
+      </div>
+    </div>` : ''}
+  `;
+  return div;
+}
+
+CLIENTS.forEach(c => cardsContainer.appendChild(buildCard(c)));
+
+// General card
+const generalCard = document.createElement('div');
+generalCard.className = 'client-card';
+generalCard.id = 'card-general';
+generalCard.innerHTML = `
+  <div class="client-head">
+    <h2>General ADCOM</h2>
+    <div class="meta-row">
+      <div class="meta-item"><span class="label">Aplica a</span><span class="value">Todas las cuentas</span></div>
+    </div>
+  </div>
+  <div class="section">
+    <h3><span class="icon">🔗</span> Fuentes generales</h3>
+    <div class="link-grid">
+      ${GENERAL.links.map(l => `
+        <a class="link-card" href="${l.url}" target="_blank" rel="noopener">
+          <span class="ic">${l.ic}</span>
+          <span class="txt"><span>${l.label}</span><small>${l.sub}</small></span>
+        </a>`).join('')}
+    </div>
+  </div>
+  <div class="section">
+    <h3><span class="icon">🗝️</span> Nota de acceso</h3>
+    <div class="note-box">${GENERAL.note}</div>
+  </div>
+`;
+cardsContainer.appendChild(generalCard);
+document.querySelector('.nav-item[data-target="general"]').addEventListener('click', ()=> showClient('general'));
+
+function showClient(id){
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.target === id));
+  document.querySelectorAll('.client-card').forEach(el => el.classList.toggle('active', el.id === 'card-' + id));
+
+  if(id === 'general'){
+    topbarTitle.textContent = 'General ADCOM';
+    badgeCount.textContent = 'Fuentes compartidas';
+  } else {
+    const client = CLIENTS.find(c => c.id === id);
+    topbarTitle.textContent = client.name + ' — cobertura mientras Mike está fuera';
+    const urgentCount = client.tasks.filter(t=>t.urgent).length;
+    badgeCount.textContent = urgentCount > 0 ? `${urgentCount} pendiente(s) urgente(s)` : 'Sin pendientes urgentes';
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// abrir la primera cuenta por defecto
+showClient(CLIENTS[0].id);
+</script>
+</body>
+</html>
